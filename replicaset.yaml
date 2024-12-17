@@ -1,0 +1,35 @@
+# ReplicaSet Configuration for NGINX Pods
+# This file defines a ReplicaSet that maintains 3 NGINX web server pods
+
+# Kubernetes API version for ReplicaSet resource
+apiVersion: apps/v1
+# Type of Kubernetes resource we're creating
+kind: ReplicaSet
+
+# Metadata section for naming and labeling the ReplicaSet
+metadata:
+  name: nginx-replicaset  # Name of our ReplicaSet
+
+# Specification section defining desired state
+spec:
+  # Number of pod replicas to maintain
+  replicas: 3  # ReplicaSet will ensure 3 pods are always running
+
+  # Selector defines how the ReplicaSet identifies which pods to manage
+  selector:
+    matchLabels:
+      app: nginx  # Manages pods with label app=nginx
+
+  # Template for creating new pods
+  template:
+    metadata:
+      # Labels to apply to the pods
+      labels:
+        app: nginx  # Must match selector above
+    spec:
+      # Container specifications
+      containers:
+      - name: nginx  # Name of the container
+        image: nginx:latest  # Docker image to use
+        ports:
+        - containerPort: 80  # Port that NGINX listens on
