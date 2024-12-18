@@ -1,21 +1,20 @@
 # ReplicaSet Configuration for NGINX Pods
-# This file defines a ReplicaSet that maintains 3 NGINX web server pods
-
-# Kubernetes API version for ReplicaSet resource
 apiVersion: apps/v1
-# Type of Kubernetes resource we're creating
 kind: ReplicaSet
 
-# Metadata section for naming and labeling the ReplicaSet
+# Metadata section for naming, labeling, and documenting the ReplicaSet
 metadata:
-  name: nginx-replicaset  # Name of our ReplicaSet
+  name: nginx-replicaset  # Name of the ReplicaSet
+  namespace: web-namespace  # Namespace for logical separation
+  annotations:
+    description: "ReplicaSet for managing 3 NGINX web server pods"
+    owner: "DevOps Team"
 
-# Specification section defining desired state
+# Specification section defining the desired state
 spec:
-  # Number of pod replicas to maintain
-  replicas: 3  # ReplicaSet will ensure 3 pods are always running
+  replicas: 3  # Ensure 3 replicas are always running
 
-  # Selector defines how the ReplicaSet identifies which pods to manage
+  # Selector defines how the ReplicaSet identifies pods to manage
   selector:
     matchLabels:
       app: nginx  # Manages pods with label app=nginx
@@ -23,13 +22,37 @@ spec:
   # Template for creating new pods
   template:
     metadata:
-      # Labels to apply to the pods
       labels:
         app: nginx  # Must match selector above
+        tier: frontend  # Additional label for organizational purposes
     spec:
-      # Container specifications
       containers:
       - name: nginx  # Name of the container
-        image: nginx:latest  # Docker image to use
+        image: nginx:1.25.2  # Specify a stable NGINX version
         ports:
         - containerPort: 80  # Port that NGINX listens on
+
+        # Resource requests and limits
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "250m"
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+
+        # Liveness probe to check if the container is running
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 10
+
+        # Readiness probe to check if the container is ready to serve traffic
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 10
